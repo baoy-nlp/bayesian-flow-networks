@@ -39,6 +39,7 @@ from utils_train import (
     make_infinite,
     make_progress_bar, make_config, make_dataloaders, make_bfn,
 )
+RUN_ID_DAFAULT="BFN"
 
 torch.set_float32_matmul_precision("high")
 torch.backends.cudnn.benchmark = True
@@ -104,7 +105,7 @@ def validate(
     if checkpoint_root_dir is not None and (loss < best_val_loss or math.isinf(best_val_loss)):
         logger.info(f"loss improved: new value is {loss}")
         step_checkpoint_path = checkpoint_root_dir / "best"
-        run_id = "BFN" if isinstance(run, defaultdict) else run["sys"]["id"].fetch()
+        run_id = RUN_ID_DAFAULT if isinstance(run, defaultdict) else run["sys"]["id"].fetch()
         checkpoint_training_state(step_checkpoint_path, accelerator, ema_model, step, run_id)
         run["metrics/best/loss/metric"] = loss
         run["metrics/best/loss/step"] = step
@@ -124,7 +125,7 @@ def train(
 ):
     is_main = accelerator.is_main_process
     pbar = make_progress_bar(is_main)
-    run_id = "BFN" if isinstance(run, defaultdict) else run["sys"]["id"].fetch()
+    run_id = RUN_ID_DAFAULT if isinstance(run, defaultdict) else run["sys"]["id"].fetch()
     train_id = pbar.add_task(f"Training {run_id}", start=cfg.start_step, total=cfg.n_training_steps, loss=math.nan)
     checkpoint_root_dir = init_checkpointing(cfg.checkpoint_dir, run_id) if is_main else None
     best_val_loss = math.inf
@@ -155,9 +156,9 @@ def train(
                 try:
                     run["checkpoints/last"].track_files(str(checkpoint_root_dir / "last"))
                 except AttributeError:
-                    logger.info(run)
+                    # logger.info(run)
                     logger.info(run["checkpoints/last"])
-                    logger.info("'collections.defaultdict' object has no attribute 'track_files'")
+                    # logger.info("'collections.defaultdict' object has no attribute 'track_files'")
 
             log(run["metrics"]["train"]["loss"], step_loss / cfg.accumulate, step, is_main and step % cfg.log_interval == 0)
             log(run["metrics"]["epoch"], step // len(dataloaders["train"]), step, is_main)
@@ -206,4 +207,7 @@ def main(cfg):
 
 if __name__ == "__main__":
     cfg_file = OmegaConf.from_cli()['config_file']
+    import os
+    RUN_ID_DAFAULT=os.path.basename(cfg_file).split('.')[0]
+    
     main(make_config(cfg_file))

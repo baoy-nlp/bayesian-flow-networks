@@ -1,5 +1,5 @@
 meta:
-  neptune:
+  neptune: 
   debug: False
 data:
   dataset: "bin_mnist"
@@ -61,10 +61,10 @@ optimizer:
   lr: 1e-4
   betas: [0.9,0.98]
 training:
-  checkpoint_interval: colab
+  checkpoint_interval: 1000
   ema_decay: 0.9999
   grad_clip_norm: 5.0
   log_interval: 1
   n_training_steps: 1_000_000
-  val_interval: 50_000
+  val_interval: 5000
   val_repeats: 1000
