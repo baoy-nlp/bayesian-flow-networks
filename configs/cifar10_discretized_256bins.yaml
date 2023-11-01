@@ -1,6 +1,6 @@
 meta:
   neptune: 
-  debug: False
+  debug: True
 data:
   dataset: "cifar10"
   horizontal_flip: False

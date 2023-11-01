@@ -152,7 +152,12 @@ def train(
 
             if is_main and (step % cfg.checkpoint_interval == 0):
                 checkpoint_training_state(checkpoint_root_dir / "last", accelerator, ema_model, step, run_id)
-                run["checkpoints/last"].track_files(str(checkpoint_root_dir / "last"))
+                try:
+                    run["checkpoints/last"].track_files(str(checkpoint_root_dir / "last"))
+                except AttributeError:
+                    logger.info(run)
+                    logger.info(run["checkpoints/last"])
+                    logger.info("'collections.defaultdict' object has no attribute 'track_files'")
 
             log(run["metrics"]["train"]["loss"], step_loss / cfg.accumulate, step, is_main and step % cfg.log_interval == 0)
             log(run["metrics"]["epoch"], step // len(dataloaders["train"]), step, is_main)

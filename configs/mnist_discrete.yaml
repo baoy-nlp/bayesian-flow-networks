@@ -61,7 +61,7 @@ optimizer:
   lr: 1e-4
   betas: [0.9,0.98]
 training:
-  checkpoint_interval: 10_000
+  checkpoint_interval: colab
   ema_decay: 0.9999
   grad_clip_norm: 5.0
   log_interval: 1
